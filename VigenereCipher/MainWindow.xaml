@@ -1,0 +1,101 @@
+﻿<mah:MetroWindow x:Class="VigenereCipher.MainWindow"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                 xmlns:local="clr-namespace:VigenereCipher"
+                 xmlns:localctl="clr-namespace:VigenereCipher.Controls"
+                 Title="Vigenere Cipher" Height="350" Width="425"
+                 ResizeMode="CanResizeWithGrip" GlowBrush="Gray"
+                 FontFamily="Segoe UI" FontSize="16">
+    <Window.Resources>
+        <Style x:Key="textBoxInError" TargetType="{x:Type TextBox}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="true">
+                    <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                                Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <local:VigenereConvertor x:Key="VigenereConvertor" />
+        <ControlTemplate x:Key="WatermarkTextBox" TargetType="{x:Type TextBoxBase}">
+        	<Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+        		<ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+        	</Border>
+        	<ControlTemplate.Triggers>
+        		<Trigger Property="IsEnabled" Value="False">
+        			<Setter Property="Opacity" TargetName="border" Value="0.56"/>
+        		</Trigger>
+        		<Trigger Property="IsMouseOver" Value="True">
+        			<Setter Property="BorderBrush" TargetName="border" Value="#FF7EB4EA"/>
+        		</Trigger>
+        		<Trigger Property="IsKeyboardFocused" Value="True">
+        			<Setter Property="BorderBrush" TargetName="border" Value="#FF569DE5"/>
+        		</Trigger>
+        	</ControlTemplate.Triggers>
+        </ControlTemplate>
+    </Window.Resources>
+    <AdornerDecorator>
+        <Grid x:Name="root">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <AdornerDecorator Grid.Row="0" Grid.Column="1">
+                <TextBox x:Name="keyText" 
+                 Style="{StaticResource textBoxInError}"
+                 FontSize="30" TextAlignment="Center"
+                 Margin="5 30 10 30"
+                     mah:TextboxHelper.ClearTextButton="True">
+                    <localctl:WatermarkService.Watermark>
+                        <TextBlock FontSize="30" TextAlignment="Center">Key</TextBlock>
+                    </localctl:WatermarkService.Watermark>
+                    <TextBox.Text>
+                        <Binding RelativeSource="{RelativeSource Self}" Path="Tag" Mode="TwoWay">
+                            <Binding.ValidationRules>
+                                <local:OnlyLetterRule />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+            </AdornerDecorator>
+
+            <AdornerDecorator Grid.Row="1" Grid.Column="1">
+                <TextBox x:Name="plainText" 
+                 Style="{StaticResource textBoxInError}"
+                 FontSize="30" TextAlignment="Center"
+                 Margin="5 30 10 30">
+                    <localctl:WatermarkService.Watermark>
+                        <TextBlock TextAlignment="Center" FontSize="30">Plain Code</TextBlock>
+                    </localctl:WatermarkService.Watermark>
+                </TextBox>
+            </AdornerDecorator>
+
+            <AdornerDecorator Grid.Row="2" Grid.Column="1">
+                <TextBox x:Name="cipherText"
+                 IsReadOnly="True" Style="{StaticResource textBoxInError}"
+                 FontSize="30" Margin="5 30 10 30" TextAlignment="Center"
+                 GotFocus="cipherText_GotFocus">
+                    <localctl:WatermarkService.Watermark>
+                        <TextBlock TextAlignment="Center" FontSize="30">Cipher Code</TextBlock>
+                    </localctl:WatermarkService.Watermark>
+
+                    <TextBox.Text>
+                        <MultiBinding Converter="{StaticResource VigenereConvertor}" Mode="OneWay">
+                            <Binding ElementName="keyText" Path="Text" />
+                            <Binding ElementName="plainText" Path="Text" />
+                        </MultiBinding>
+                    </TextBox.Text>
+                </TextBox>
+            </AdornerDecorator>
+
+        </Grid>
+    </AdornerDecorator>
+    
+</mah:MetroWindow>
